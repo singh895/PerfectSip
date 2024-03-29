@@ -6,7 +6,7 @@
 #include "bluart.h"
 #include "ttl.h"
 
-// char bluart_inputbuf[128];
+char bluart_inputbuf[128];
 // char bluart_outputbuf[64];
 
 struct IODevice bluart_device = {
@@ -16,8 +16,7 @@ struct IODevice bluart_device = {
     .device_putchar = bluart_putchar,
 	.input_buffer = {
 		.size = 128,
-		// .buffer = &bluart_inputbuf[0],
-        .buffer = 0,
+		.buffer = &bluart_inputbuf[0],
 
 
 		.sidx = 0,

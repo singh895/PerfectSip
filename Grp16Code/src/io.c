@@ -275,3 +275,42 @@ io_error_t dev_flush(struct IODevice* device) {
 
     return IO_SUCCESS;
 }
+
+io_error_t dev_print_ioerror(struct IODevice* device, io_error_t error) {
+    
+    io_error_t ioerror;
+    
+    switch (error)
+    {
+        case IO_SUCCESS:
+            ioerror = dev_prints(device, "IO successful\n");
+            break;
+        case IO_NULL_BUFFOBJ:
+            ioerror = dev_prints(device, "IO ERROR: Null buffer object\n");
+            break;
+        case IO_NULL_BUFFER:
+            ioerror = dev_prints(device, "IO ERROR: Null buffer array pointer\n");
+            break;
+        case IO_NO_BUFFER:
+            ioerror = dev_prints(device, "IO ERROR: No buffer\n");
+            break;
+        case IO_BUFFER_FULL:
+            ioerror = dev_prints(device, "IO ERROR: Buffer full\n");
+            break;
+        case IO_BUFFER_EMPTY:
+            ioerror = dev_prints(device, "IO ERROR: Buffer empty\n");
+            break;
+        case IO_ARG_ERROR:
+            ioerror = dev_prints(device, "IO ERROR: Func argument\n");
+            break;
+        case IO_NOT_IMPLMENT:
+            ioerror = dev_prints(device, "IO ERROR: Not implemented\n");
+            break;
+    
+        default:
+            ioerror = dev_prints(device, "IO ERROR: Device specific IO error\n");
+            break;
+    }
+
+    return ioerror;
+}

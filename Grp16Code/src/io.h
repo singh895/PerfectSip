@@ -101,4 +101,11 @@ io_error_t dev_prints(struct IODevice* device, char* str);
 io_error_t dev_flush(struct IODevice* device);
 
 
+/// @brief Prints an error message to the specified device
+/// @param device Device to print error message to
+/// @param error Error value
+/// @return Error code
+io_error_t dev_print_ioerror(struct IODevice* device, io_error_t error);
+
+
 #endif
