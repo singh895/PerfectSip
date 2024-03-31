@@ -10,3 +10,6 @@ heating_protoype/lib/README
 heating_protoype/include/README
 477Bluetooth/test/README
 477Bluetooth/lib/README
+IOemulator/debug.txt
+IOemulator/emulator
+IOemulator/obj/*.o
