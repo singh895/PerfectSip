@@ -65,9 +65,6 @@ void bluart_init()
     USART1->CR1 |= USART_CR1_RXNEIE;    // Generate interrupt when RXNE
     NVIC->ISER[0] |= 1<<USART1_IRQn;    // Enable interrupt in ISER
                                         // Hope this is enough for interrupts
-
-    // Reset bluetooth module 
-    reset_bluetooth();
 }
 
 void reset_bluetooth() {

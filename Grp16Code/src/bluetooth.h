@@ -63,6 +63,8 @@ struct bluetooth_info
     char noti;       // 0 for not notify, 1 for notify (when connect or disconnect)
     char notp;       // 0 to not send connected mac address, 1 to send mac address info with noti 
 
+    char cmd_waiting;
+
     int data_len;                   // Tracks length of data stored in OK response
     bluetooth_state_t state;     // Current state
     bluetooth_prevcmd_t prevcmd; // Previously executed command
@@ -72,9 +74,50 @@ struct bluetooth_info
 extern struct IODevice bluetooth_device;
 extern struct bluetooth_info bt_info;
 
+/// @brief Initializes bluetooth
 void bluetooth_init();
 
+/// @brief Sets AT command
+/// @return Error code
+io_error_t bluetooth_AT();
+
+/// @brief Sets characteristic
+/// @param char_str Characteristic value
+/// @return Error code
+io_error_t bluetooth_CHAR(char* char_str);
+
+/// @brief Sets notify information
+/// @param notify notify info
+/// @return Error code
+io_error_t bluetooth_NOTI(char notify);
+
+/// @brief Sets notify mode
+/// @param notifyp notify mode
+/// @return Error code
+io_error_t bluetooth_NOTP(char notifyp);
+
+/// @brief Sets device name
+/// @param name_str name
+/// @return Error code
+io_error_t bluetooth_NAME(char* name_str);
+
+/// @brief Sets UUID
+/// @param uuid_str uid
+/// @return Error code
+io_error_t bluetooth_UUID(char* uuid_str);
+
+/// @brief Sends start command
+/// @return Error code
+io_error_t bluetooth_START();
+
+/// @brief Sends a character to bluetooth hardware
+/// @param c Character to send
+/// @return Error code
 io_error_t bluetooth_putchar(char c);
+
+/// @brief Gets a character from bluetooth
+/// @param c Recieve character pointer 
+/// @return Error code
 io_error_t bluetooth_getchar(char *c);
 
 #endif
