@@ -64,16 +64,3 @@ io_error_t bluart_getchar(char* c) {
 
     return IO_NOT_IMPLMENT;
 }
-
-io_error_t send_float_over_bluetooth(float fl) {
-    // Convert temperature to string
-    char temp_str[10]; // Adjust the size based on your temperature range
-    sprintf(temp_str, "%.2f", fl);
-
-    // Send each character of the string over Bluetooth
-    for (int i = 0; temp_str[i] != '\0'; i++) {
-        bluart_putchar(temp_str[i]);
-    }
-
-    return IO_SUCCESS;
-}

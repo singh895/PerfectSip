@@ -14,7 +14,7 @@ FILE* ttl_file = NULL;
 
 int main(int argc, char** argv)
 {
-	// Get file pointer from arguments
+	// Get file pointer for ttl from arguments
 	if (argc == 1)
 	{
 		ttl_file = fopen("debug.txt", "w");
@@ -42,9 +42,10 @@ int main(int argc, char** argv)
 	}
 
 	// Start IO read thread
-	pthread_t thread_id;
+	pthread_t io_tid, parse_tid;
 
-	pthread_create(&thread_id, NULL, io_thread, NULL);
+	pthread_create(&io_tid, NULL, io_thread, NULL);
+	pthread_create(&parse_tid, NULL, parse_thread, NULL);
 
 	fprintf(stdout, "Thread created, ready to recieve input: \n");
 
@@ -77,6 +78,25 @@ void* io_thread(void* args)
 			dev_print_ioerror(&ttl_device, ioerror);
 			return NULL;
 		}
+	}
+}
+
+void* parse_thread(void* args)
+{
+	int counter = 0;
+
+	while(1) {
+
+		bluetooth_updatestate();
+
+		counter++;
+
+		if (counter % 128) {
+			dev_prints(&ttl_device, "Heartbeat ");
+
+		}
+
+		sleep(0.01);
 	}
 }
 

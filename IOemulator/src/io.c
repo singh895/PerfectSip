@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "io.h"
 
 io_error_t buff_putchar(struct IOBuffer* buffer, char c)
@@ -248,6 +250,8 @@ io_error_t dev_prints(struct IODevice* device, char* str) {
     return IO_SUCCESS;
 }
 
+
+
 io_error_t dev_flush(struct IODevice* device) {
 
     char c;
@@ -274,6 +278,30 @@ io_error_t dev_flush(struct IODevice* device) {
     }
 
     return IO_SUCCESS;
+}
+
+io_error_t dev_print_int(struct IODevice* device, int i) {
+    int sretval;
+    char temp_str[12];
+
+    sretval = snprintf(temp_str, 12, "%d", i);
+    if (sretval < 0) {
+        return IO_ARG_ERROR;
+    }
+
+    return dev_prints(device, temp_str);
+}
+
+io_error_t dev_print_float(struct IODevice* device, float f) {
+    int sretval;
+    char temp_str[12];
+
+    sretval = snprintf(temp_str, 12, "%.2f", f);
+    if (sretval < 0) {
+        return IO_ARG_ERROR;
+    }
+
+    return dev_prints(device, temp_str);
 }
 
 io_error_t dev_print_ioerror(struct IODevice* device, io_error_t error) {
