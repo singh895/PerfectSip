@@ -72,40 +72,6 @@ void setup_adcC(void) {
     while (ADC1->CR & ADC_CR_ADCAL);
 }
 
-float read_adc_voltage(void) {
-    ADC1->CR |= ADC_CR_ADSTART; // Start ADC conversion
-    while (!(ADC1->ISR & ADC_ISR_EOC)); // Wait until conversion is complete
-
-    // Read converted value
-    uint16_t adc_value = ADC1->DR;
-
-    // Convert ADC value to voltage
-    return (3.3f * adc_value) / 4095.0f;
-}
-
-void print_voltage(float voltage) {
-    char buffer[32];
-    int wholePart = (int)voltage;
-    int decimalPart = (int)((voltage - wholePart) * 1000); // Assuming 2 decimal places
-    sprintf(buffer, "Voltage: %d.%02d V\n", wholePart, decimalPart);
-    print_string(buffer);
-}
-
-float voltage_to_temp(float voltage) {
-    float temp = 0-(0.421)*(330/voltage-100)+124.84;
-    return temp;
-}
-
-void print_temp(float voltage) { 
-    char buffer[32];
-    float temp = voltage_to_temp(voltage);
-    int wholePart = (int)temp;
-    int decimalPart = (int)((temp - wholePart) * 1000); // Assuming 2 decimal places
-    sprintf(buffer, "Temprature: %d.%02d F\n\n", wholePart, decimalPart);
-    print_string(buffer);
-}
-
-
 void setup_gpio(void) {
     // Enable GPIOC and GPIOB clocks
     RCC->AHBENR |= RCC_AHBENR_GPIOCEN | RCC_AHBENR_GPIOBEN;
@@ -152,22 +118,65 @@ void EXTI0_1_IRQHandler(void) {
     }
 }
 
-void check_temp_turnoff(float temp){
-    if(temp > 102.0 ){
+float read_adc_voltage(void) {
+    ADC1->CR |= ADC_CR_ADSTART; // Start ADC conversion
+    while (!(ADC1->ISR & ADC_ISR_EOC)); // Wait until conversion is complete
+
+    // Read converted value
+    uint16_t adc_value = ADC1->DR;
+
+    // Convert ADC value to voltage
+    return (3.3f * adc_value) / 4095.0f;
+}
+
+void print_voltage(float voltage) {
+    char buffer[32];
+    int wholePart = (int)voltage;
+    int decimalPart = (int)((voltage - wholePart) * 1000); // Assuming 2 decimal places
+    sprintf(buffer, "Voltage: %d.%02d V\n", wholePart, decimalPart);
+    print_string(buffer);
+}
+
+float voltage_to_temp(float voltage) {
+    float temp = 0-(0.421)*(330/voltage-100)+124.84;
+    return temp;
+}
+
+void print_temp(float temp) { 
+    char buffer[32];
+    //float temp = voltage_to_temp(voltage);
+    int wholePart = (int)temp;
+    int decimalPart = (int)((temp - wholePart) * 1000); // Assuming 2 decimal places
+    sprintf(buffer, "Temperature: %d.%02d F\n\n", wholePart, decimalPart);
+    print_string(buffer);
+}
+void check_temp_turnoff(float temp, float desired_temp){
+    if(temp > desired_temp + 2.5){
         if(GPIOC->ODR & 0x1){
             //if not already off
             print_string("\nTurned Off Heater\n\n");
         }
         GPIOC->BSRR = GPIO_BSRR_BR_0;  
         }
-    else if(temp < 98){
+    else if(temp < desired_temp - 2.5){
         if(!(GPIOC->ODR & 0x1)){
             //if not already on
             print_string("\nTurned On Heater\n\n");
         }
         GPIOC->BSRR = GPIO_BSRR_BS_0;
+    }    
+}
+
+void shiftOut(uint16_t data) {
+
+    for (uint16_t i = 0; i < 16; i++) {
+        GPIOC->BSRR = (data & 0x8000) ? (GPIO_BSRR_BS_3 | (1 << 2)) : (GPIO_BSRR_BR_3 | (1 << 2));
+        GPIOC->BSRR = (1 << 4);
+        GPIOC->BSRR = (1 << 4) << 16;
+        data <<= 1;
     }
-    return;    
+    GPIOC->BSRR = (1 << 5);
+    GPIOC->BSRR = (1 << 5) << 16;
 }
 
 int main(void) {
@@ -176,14 +185,51 @@ int main(void) {
     setup_adc();
     setup_gpio();
     setup_button_interrupt();
+    // LED Code has been added
+    RCC->AHBENR |= RCC_AHBENR_GPIOCEN; // Enable GPIOC clock
+    GPIOC->MODER |= GPIO_MODER_MODER3_0 | GPIO_MODER_MODER4_0 | GPIO_MODER_MODER5_0; // Set PC3, PC4, and PC5 as outputs
+    float desired_temp = 110;
+    unsigned int first_LED = 0b0000000000000011;
     
+    float change_in_temp = 0; // accumulates until its >= LED_threshold and then is reset to 0 
+    float prev_temp = 0;      // previous temperature read by ADC 
+    float LED_threshold = 0;  // once temperature has increased by this amount turn on another LED
+    int ctrl_var = 1;         // controls the LEDs incrementally turning on 
 
     while(1) {
         nano_wait(2000000000);
+        //print_string("Start of while Loop \n");
         float voltage = read_adc_voltage();
+        float curr_temp = voltage_to_temp(voltage);
         print_voltage(voltage);
-        print_temp(voltage);
-        check_temp_turnoff(voltage_to_temp(voltage));
+        check_temp_turnoff(voltage_to_temp(voltage), desired_temp);
+        if(prev_temp == 0) {
+            LED_threshold = (desired_temp - curr_temp) / 16.0;
+        }
+
+        change_in_temp += curr_temp - prev_temp;
+
+        print_string("Threshold");
+        print_temp(LED_threshold);
+        print_string("Temperature Change");
+        print_temp(change_in_temp);
+        print_string("Current Temperature: ");
+        print_temp(curr_temp);
+        print_string("Previous Temperature: ");
+        print_temp(prev_temp);
+
+        if(change_in_temp >= LED_threshold) {
+            if(ctrl_var < 16) {
+                shiftOut(first_LED);
+                first_LED |= (1 << (ctrl_var + 1));
+                ctrl_var++;
+                change_in_temp = 0;
+                print_string("LED should turn on \n");
+            }
+        }
+        prev_temp = curr_temp;
+        nano_wait(2000000000);
+        print_string("End of while Loop \n");
     }
 }
 
