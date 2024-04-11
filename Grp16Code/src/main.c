@@ -28,11 +28,15 @@ int main(void)
 	dev_prints(&ttl_device, "Using dprints on STM32F0\n");
 
 	dev_prints(&ttl_device, "Init led...\n");
+
 	led_init();
 
 	dev_prints(&ttl_device, "led init'd, running test code...\n");
 
 	led_test();
+	// led_shiftOut(0xFFFF); // Turn on all LEDs
+
+	while(1);
 
 	// dev_prints(&ttl_device, "Init bluart...\n");
 
