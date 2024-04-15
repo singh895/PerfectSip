@@ -69,11 +69,9 @@ struct bluetooth_info
     char noti;       // 0 for not notify, 1 for notify (when connect or disconnect)
     char notp;       // 0 to not send connected mac address, 1 to send mac address info with noti 
 
-    char cmd_waiting;
-
     int data_len;                   // Tracks length of data stored in OK response
-    bluetooth_state_t state;     // Current state
-    bluetooth_prevcmd_t prevcmd; // Previously executed command
+    bluetooth_state_t state;        // Current state
+    bluetooth_prevcmd_t prevcmd;    // Previously executed command
 };
 
 

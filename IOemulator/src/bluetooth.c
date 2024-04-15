@@ -46,9 +46,7 @@ struct bluetooth_info bt_info = {
 
 	.noti = 0,
 	.notp = 0,
-
-	.cmd_waiting = 0,
-
+	
 	.data_len = 0,
 	.state = BT_IDLE,
 	.prevcmd = BTCMD_NONE
@@ -89,14 +87,14 @@ io_error_t bluetooth_AT()
 	io_error_t ioerror;
 
 	// Wait for prev command response if needed
-	while (bt_info.cmd_waiting);
+	while (bt_info.waiting);
 
 	// Send command
 	bt_info.prevcmd = BTCMD_AT;
 	ioerror = dev_prints(&bluart_device, "AT");
 	if (ioerror) return ioerror;
 
-	bt_info.cmd_waiting = 1;
+	bt_info.waiting = 1;
 
 	return IO_SUCCESS;
 }
@@ -106,7 +104,7 @@ io_error_t bluetooth_CHAR(char* char_str)
 	io_error_t ioerror;
 
 	// Wait for prev command response if needed
-	while (bt_info.cmd_waiting);
+	while (bt_info.waiting);
 
 	// Send command
 	bt_info.prevcmd = BTCMD_CHAR;
@@ -115,7 +113,7 @@ io_error_t bluetooth_CHAR(char* char_str)
 	ioerror = dev_prints(&bluart_device, char_str);
 	if (ioerror) return ioerror;
 
-	bt_info.cmd_waiting = 1;
+	bt_info.waiting = 1;
 
 	return IO_SUCCESS;
 }
@@ -125,7 +123,7 @@ io_error_t bluetooth_NOTI(char notify)
 	io_error_t ioerror;
 
 	// Wait for prev command response if needed
-	while (bt_info.cmd_waiting);
+	while (bt_info.waiting);
 
 	// Send command
 	bt_info.prevcmd = BTCMD_NOTI;
@@ -137,7 +135,7 @@ io_error_t bluetooth_NOTI(char notify)
 	}
 	if (ioerror) return ioerror;
 
-	bt_info.cmd_waiting = 1;
+	bt_info.waiting = 1;
 
 	return IO_SUCCESS;
 }
@@ -147,7 +145,7 @@ io_error_t bluetooth_NOTP(char notifyp)
 	io_error_t ioerror;
 
 	// Wait for prev command response if needed
-	while (bt_info.cmd_waiting);
+	while (bt_info.waiting);
 
 	// Send command
 	bt_info.prevcmd = BTCMD_NOTP;
@@ -159,7 +157,7 @@ io_error_t bluetooth_NOTP(char notifyp)
 	}
 	if (ioerror) return ioerror;
 
-	bt_info.cmd_waiting = 1;
+	bt_info.waiting = 1;
 
 	return IO_SUCCESS;
 }
@@ -169,7 +167,7 @@ io_error_t bluetooth_NAME(char* name_str)
 	io_error_t ioerror;
 
 	// Wait for prev command response if needed
-	while (bt_info.cmd_waiting);
+	while (bt_info.waiting);
 
 	// Send command
 	bt_info.prevcmd = BTCMD_NAME;
@@ -178,7 +176,7 @@ io_error_t bluetooth_NAME(char* name_str)
 	ioerror = dev_prints(&bluart_device, name_str);
 	if (ioerror) return ioerror;
 
-	bt_info.cmd_waiting = 1;
+	bt_info.waiting = 1;
 
 	return IO_SUCCESS;
 }
@@ -188,7 +186,7 @@ io_error_t bluetooth_UUID(char* uuid_str)
 	io_error_t ioerror;
 
 	// Wait for prev command response if needed
-	while (bt_info.cmd_waiting);
+	while (bt_info.waiting);
 
 	// Send command
 	bt_info.prevcmd = BTCMD_UUID;
@@ -197,7 +195,7 @@ io_error_t bluetooth_UUID(char* uuid_str)
 	ioerror = dev_prints(&bluart_device, uuid_str);
 	if (ioerror) return ioerror;
 
-	bt_info.cmd_waiting = 1;
+	bt_info.waiting = 1;
 
 	return IO_SUCCESS;
 }
@@ -207,14 +205,14 @@ io_error_t bluetooth_START()
 	io_error_t ioerror;
 
 	// Wait for prev command response if needed
-	while (bt_info.cmd_waiting);
+	while (bt_info.waiting);
 
 	// Send command
 	bt_info.prevcmd = BTCMD_START;
 	ioerror = dev_prints(&bluart_device, "AT+START");
 	if (ioerror) return ioerror;
 
-	bt_info.cmd_waiting = 1;
+	bt_info.waiting = 1;
 
 	return IO_SUCCESS;
 }
@@ -262,7 +260,7 @@ void bluetooth_updatestate()
 			case '\n':	// Go to idle, end of data
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_putchar(&bluetooth_device.input_buffer, '\n');
 				break;
 			default:
@@ -279,7 +277,7 @@ void bluetooth_updatestate()
 			case '\n':	// Wasnt start of OK+, save sent "O"
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_putchar(&bluetooth_device.input_buffer, 'O');
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
 				break;
@@ -299,7 +297,7 @@ void bluetooth_updatestate()
 			case '\n':	// OK response from module
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				break;
 			default: 	// Wasnt start of OK+, save sent "OK"
 				bt_info.state = BT_DATA;
@@ -324,7 +322,7 @@ void bluetooth_updatestate()
 			case '\n':	// Unexpected return, treat OK+ like data
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
 				break;
@@ -344,7 +342,7 @@ void bluetooth_updatestate()
 			case '\n':	// Unexpected return, treat OK+L like data
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_putchar(&bluetooth_device.input_buffer, 'L');
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -365,7 +363,7 @@ void bluetooth_updatestate()
 			case '\n':	// Unexpected return, treat OK+LO like data
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_prints(&bluetooth_device.input_buffer, "LO");
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -386,7 +384,7 @@ void bluetooth_updatestate()
 			case '\n':	// Unexpected return, treat OK+LOS like data
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_prints(&bluetooth_device.input_buffer, "LOS");
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -407,7 +405,7 @@ void bluetooth_updatestate()
 			case '\n':	// Recieved OK+LOST, device disconnected
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				bt_info.connected = 0;
 				break;
 			default: 	// Unexpected data, treat OK+LOST like data
@@ -423,7 +421,7 @@ void bluetooth_updatestate()
 			case '\n':	// Recieved OK+LOST, device disconnected
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				bt_info.connected = 0;
 				break;
 			default:	// This should be the mac address of disconnected device. Dont handle data
@@ -438,7 +436,7 @@ void bluetooth_updatestate()
 			case '\n':	// Unexpected return, treat OK+C like data
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_putchar(&bluetooth_device.input_buffer, 'C');
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -459,7 +457,7 @@ void bluetooth_updatestate()
 			case '\n':	// Unexpected return, treat OK+CO like data
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_prints(&bluetooth_device.input_buffer, "CO");
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -480,7 +478,7 @@ void bluetooth_updatestate()
 			case '\n':	// Unexpected return, treat OK+CON like data
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_prints(&bluetooth_device.input_buffer, "CON");
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -501,8 +499,8 @@ void bluetooth_updatestate()
 			case '\n':	// Recieved OK+CONN, device connected
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
-				bt_info.connected = 0;
+				bt_info.waiting = 0;
+				bt_info.connected = 1;
 				break;
 			default: 	// Unexpected data, treat OK+CONN like data
 				bt_info.state = BT_DATA; 
@@ -517,8 +515,8 @@ void bluetooth_updatestate()
 			case '\n':	// Recieved OK+CONN, device disconnected
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
-				bt_info.connected = 0;
+				bt_info.waiting = 0;
+				bt_info.connected = 1;
 				bt_info.data_len = 0;
 				break;
 			default:	// This should be the mac address of disconnected device. Dont handle data
@@ -541,7 +539,7 @@ void bluetooth_updatestate()
 			case '\n':	// Unexpected return, treat OK+S like data
 			case '\r': 
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_putchar(&bluetooth_device.input_buffer, 'S');
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -562,7 +560,7 @@ void bluetooth_updatestate()
 			case '\n':
 			case '\r':	// Unexpected data, treat OK+ST like data
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_prints(&bluetooth_device.input_buffer, "ST");
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -583,7 +581,7 @@ void bluetooth_updatestate()
 			case '\n':
 			case '\r':	// Unexpected data, treat OK+STA like data
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_prints(&bluetooth_device.input_buffer, "STA");
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -604,7 +602,7 @@ void bluetooth_updatestate()
 			case '\n':
 			case '\r':	// Unexpected data, treat OK+STAR like data
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_prints(&bluetooth_device.input_buffer, "STAR");
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -622,7 +620,7 @@ void bluetooth_updatestate()
 			case '\n':
 			case '\r':	// Recieved OK+START, module started
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				bt_info.started = 1;
 				break;
 			default:
@@ -637,7 +635,7 @@ void bluetooth_updatestate()
 			case '\n':
 			case '\r':	// Unexpected data, treat OK+Se like data
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_prints(&bluetooth_device.input_buffer, "Se");
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -661,7 +659,7 @@ void bluetooth_updatestate()
 			case '\n':
 			case '\r':	// Unexpected data, treat OK+Set like data
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_prints(&bluetooth_device.input_buffer, "Set");
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -680,7 +678,7 @@ void bluetooth_updatestate()
 			case '\n':
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				bt_info.data_len = 0;
 				break;
 			
@@ -737,7 +735,7 @@ void bluetooth_updatestate()
 			case '\n':
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_prints(&bluetooth_device.input_buffer, "SetN");
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -758,7 +756,7 @@ void bluetooth_updatestate()
 			case '\n':
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_prints(&bluetooth_device.input_buffer, "SetNa");
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -779,7 +777,7 @@ void bluetooth_updatestate()
 			case '\n':
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_prints(&bluetooth_device.input_buffer, "SetNam");
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -800,7 +798,7 @@ void bluetooth_updatestate()
 			case '\n':
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				buff_prints(&bluetooth_device.input_buffer, "OK+");
 				buff_prints(&bluetooth_device.input_buffer, "SetName");
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
@@ -818,7 +816,7 @@ void bluetooth_updatestate()
 			case '\n':
 			case '\r':
 				bt_info.state = BT_IDLE;
-				bt_info.cmd_waiting = 0;
+				bt_info.waiting = 0;
 				bt_info.data_len = 0;
 				break;
 			default: 
@@ -833,7 +831,7 @@ void bluetooth_updatestate()
 
 		default:
 			bt_info.state = BT_IDLE;
-			bt_info.cmd_waiting = 0;
+			bt_info.waiting = 0;
 			break;
 		}
 	}
@@ -841,7 +839,7 @@ void bluetooth_updatestate()
 
 io_error_t bluetooth_putchar(char c)
 {
-	if (bt_info.cmd_waiting) {
+	if (bt_info.waiting) {
 		return IO_DEVERROR0;
 	}
 	else if (!bt_info.connected) {

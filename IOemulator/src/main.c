@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 	dprintf(STDOUT_FILENO, "bluetooth_init() completed!\n");
 	dev_prints(&ttl_device, "bluetooth_init() completed!\n");
 
-	sleep(10);
+	sleep(15 * 60);
 
 	// Close file
 	fclose(ttl_file);
