@@ -21,9 +21,4 @@ io_error_t bluart_putchar(char c);
 /// @return Error code
 io_error_t bluart_getchar(char* c);
 
-/// @brief Sends float over bluetooth 
-/// @param Float value to send 
-/// @return IO_SUCCESS, should do error checking
-io_error_t send_float_over_bluetooth(float fl);
-
 #endif

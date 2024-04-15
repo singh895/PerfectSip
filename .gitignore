@@ -14,3 +14,4 @@ IOemulator/debug.txt
 IOemulator/emulator
 IOemulator/obj/*.o
 .vscode/settings.json
+IOemulator/.vscode/settings.json

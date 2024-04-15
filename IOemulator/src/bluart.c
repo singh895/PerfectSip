@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include "io.h"
 #include "bluart.h"
@@ -36,22 +38,22 @@ extern struct IODevice ttl_device;
 
 void bluart_init() 
 {
-    //fprintf(stdout, "Called bluart_init()\n");
+    dev_prints(&ttl_device, "Called bluart_init()\n");
     return;
 }
 
 void reset_bluetooth() {
-    //fprintf(stdout, "Called reset_bluetooth()\n");
+    dev_prints(&ttl_device, "Called reset_bluetooth()\n");
     return;
 }
 
 io_error_t bluart_putchar(char c) {
 
-    int pchar; 
+	ssize_t size;
 
-    pchar = fputc(c, stdout);
+	size = write(STDOUT_FILENO, &c, 1);
 
-    if ((char)pchar != c) {
+	if (size != 1) {
 		return IO_DEVERROR0;
 	}
 
@@ -59,8 +61,6 @@ io_error_t bluart_putchar(char c) {
 }
 
 io_error_t bluart_getchar(char* c) {
-
-
 
     return IO_NOT_IMPLMENT;
 }
