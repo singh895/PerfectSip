@@ -100,6 +100,18 @@ io_error_t dev_prints(struct IODevice* device, char* str);
 /// @return Error code
 io_error_t dev_flush(struct IODevice* device);
 
+/// @brief Prints an integer to the specified device
+/// @param device Device to print integer to
+/// @param i Integer to print
+/// @return Error code 
+io_error_t dev_print_int(struct IODevice* device, int i);
+
+/// @brief Prints a float to the specified device
+/// @param device Device to print float to
+/// @param f Float to print
+/// @return 
+io_error_t dev_print_float(struct IODevice* device, float f);
+
 
 /// @brief Prints an error message to the specified device
 /// @param device Device to print error message to

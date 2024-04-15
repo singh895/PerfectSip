@@ -30,10 +30,10 @@ typedef enum bluetooth_state {
     BT_START_04,    // Recieved "OK+STAR"
     BT_START_05,    // Recieved "OK+START"
 
+    // Used by CHAR, UUID, NOTI, NOTP
     BT_Set_02,      // Recieved "OK+Se" from module
     BT_Set_03,      // Recieved "OK+Set" from module
     BT_Set_04,      // Recieved "OK+Set:" from module
-    // Used by CHAR, NOTI, NOTP, UUID
 
     BT_SetName_04,  // Recieved "OK+SetN"
     BT_SetName_05,  // Recieved "OK+SetNa"

@@ -46,7 +46,7 @@ struct bluetooth_info bt_info = {
 
 	.noti = 0,
 	.notp = 0,
-	
+
 	.data_len = 0,
 	.state = BT_IDLE,
 	.prevcmd = BTCMD_NONE
@@ -261,7 +261,7 @@ void bluetooth_updatestate()
 			case '\r':
 				bt_info.state = BT_IDLE;
 				bt_info.waiting = 0;
-				buff_putchar(&bluetooth_device.input_buffer, '\n');
+				buff_putchar(&bluetooth_device.input_buffer, newchar);
 				break;
 			default:
 				bt_info.state = BT_DATA;
@@ -284,7 +284,6 @@ void bluetooth_updatestate()
 			default: 	// Wasnt start of OK+, save sent "O"
 				bt_info.state = BT_DATA;
 				buff_putchar(&bluetooth_device.input_buffer, 'O');
-				
 				buff_putchar(&bluetooth_device.input_buffer, newchar);
 				break;
 			}
@@ -726,7 +725,7 @@ void bluetooth_updatestate()
 			}
 			
 			break;
-		
+
 		case BT_SetName_04: 
 			switch (newchar) {
 			case 'a':
@@ -828,7 +827,7 @@ void bluetooth_updatestate()
 			}
 			
 			break;
-
+			
 		default:
 			bt_info.state = BT_IDLE;
 			bt_info.waiting = 0;

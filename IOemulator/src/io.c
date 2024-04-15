@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 #include "io.h"
 
 io_error_t buff_putchar(struct IOBuffer* buffer, char c)
@@ -249,8 +248,6 @@ io_error_t dev_prints(struct IODevice* device, char* str) {
 
     return IO_SUCCESS;
 }
-
-
 
 io_error_t dev_flush(struct IODevice* device) {
 

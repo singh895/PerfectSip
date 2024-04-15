@@ -30,11 +30,17 @@ typedef enum bluetooth_state {
     BT_START_04,    // Recieved "OK+STAR"
     BT_START_05,    // Recieved "OK+START"
 
+    // Used by CHAR, UUID, NOTI, NOTP
     BT_Set_02,      // Recieved "OK+Se" from module
     BT_Set_03,      // Recieved "OK+Set" from module
     BT_Set_04,      // Recieved "OK+Set:" from module
 
-    // Used by CHAR, NOTI, NOTP, 
+    BT_SetName_04,  // Recieved "OK+SetN"
+    BT_SetName_05,  // Recieved "OK+SetNa"
+    BT_SetName_06,  // Recieved "OK+SetNam"
+    BT_SetName_07,  // Recieved "OK+SetName"
+    BT_SetName_08   // Recieved "OK+SetName:"
+    
 } bluetooth_state_t;
 
 typedef enum bluetooth_prevcmd {
@@ -63,11 +69,9 @@ struct bluetooth_info
     char noti;       // 0 for not notify, 1 for notify (when connect or disconnect)
     char notp;       // 0 to not send connected mac address, 1 to send mac address info with noti 
 
-    char cmd_waiting;
-
     int data_len;                   // Tracks length of data stored in OK response
-    bluetooth_state_t state;     // Current state
-    bluetooth_prevcmd_t prevcmd; // Previously executed command
+    bluetooth_state_t state;        // Current state
+    bluetooth_prevcmd_t prevcmd;    // Previously executed command
 };
 
 
@@ -109,6 +113,9 @@ io_error_t bluetooth_UUID(char* uuid_str);
 /// @brief Sends start command
 /// @return Error code
 io_error_t bluetooth_START();
+
+/// @brief Updates the statemachine based on characters in the bluart buffer
+void bluetooth_updatestate();
 
 /// @brief Sends a character to bluetooth hardware
 /// @param c Character to send
