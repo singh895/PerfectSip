@@ -6,7 +6,7 @@
 #include "bluart.h"
 #include "ttl.h"
 
-// char bluart_inputbuf[128];
+char bluart_inputbuf[128];
 // char bluart_outputbuf[64];
 
 struct IODevice bluart_device = {
@@ -16,8 +16,7 @@ struct IODevice bluart_device = {
     .device_putchar = bluart_putchar,
 	.input_buffer = {
 		.size = 128,
-		// .buffer = &bluart_inputbuf[0],
-        .buffer = 0,
+		.buffer = &bluart_inputbuf[0],
 
 
 		.sidx = 0,
@@ -66,9 +65,6 @@ void bluart_init()
     USART1->CR1 |= USART_CR1_RXNEIE;    // Generate interrupt when RXNE
     NVIC->ISER[0] |= 1<<USART1_IRQn;    // Enable interrupt in ISER
                                         // Hope this is enough for interrupts
-
-    // Reset bluetooth module 
-    reset_bluetooth();
 }
 
 void reset_bluetooth() {
@@ -80,19 +76,6 @@ void reset_bluetooth() {
 io_error_t bluart_putchar(char c) {
 	while(!(USART1->ISR & USART_ISR_TXE));	// Wait for USART to be ready
 	USART1->TDR = c;                        // Send character
-
-    return IO_SUCCESS;
-}
-
-io_error_t send_float_over_bluetooth(float fl) {
-    // Convert temperature to string
-    char temp_str[10]; // Adjust the size based on your temperature range
-    sprintf(temp_str, "%.2f", fl);
-
-    // Send each character of the string over Bluetooth
-    for (int i = 0; temp_str[i] != '\0'; i++) {
-        bluart_putchar(temp_str[i]);
-    }
 
     return IO_SUCCESS;
 }

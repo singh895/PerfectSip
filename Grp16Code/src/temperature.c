@@ -118,9 +118,12 @@ float read_adc_voltage(void) {
     uint16_t adc_value = ADC1->DR;
 	float resistance = adc_to_resistance(adc_value);
 
-    int8_t temperature = temperature_from_resistance(resistance);
+    // Moved the conversion implementation to the phone app to save memory and runtime 
+    // We just need to send the resistance value fom adc to the phone app over bluetooth now. 
+    // int8_t temperature = temperature_from_resistance(resistance);
 
-    return temperature;
+    // return temperature;
+    return resistance;
 }
 
 void print_voltage(float voltage) {
